@@ -54,17 +54,26 @@ var output := Vector2.ZERO
 
 var _touch_index : int = -1
 
-@onready var _base := $Base
-@onready var _tip := $Base/Tip
+var _base: Control
+var _tip: Control
+var _base_default_position: Vector2
+var _tip_default_position: Vector2
 
-@onready var _base_default_position : Vector2 = _base.position
-@onready var _tip_default_position : Vector2 = _tip.position
-
-@onready var _default_color : Color = _tip.modulate
+var _default_color : Color
 
 # FUNCTIONS
 
 func _ready() -> void:
+	# Default position isn't set until later
+	call_deferred("ready_deferred")
+
+func ready_deferred() -> void:
+	_base = $Base
+	_tip = $Base/Tip
+	_base_default_position = _base.global_position
+	_tip_default_position = _tip.global_position
+	_default_color = _tip.modulate
+
 	if not DisplayServer.is_touchscreen_available() and visibility_mode == Visibility_mode.TOUCHSCREEN_ONLY :
 		hide()
 	
@@ -160,8 +169,8 @@ func _reset():
 	output = Vector2.ZERO
 	_touch_index = -1
 	_tip.modulate = _default_color
-	_base.position = _base_default_position
-	_tip.position = _tip_default_position
+	_base.global_position = _base_default_position
+	_tip.global_position = _tip_default_position
 	# Release actions
 	if use_input_actions:
 		for action in [action_left, action_right, action_down, action_up]:
